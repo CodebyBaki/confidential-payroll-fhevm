@@ -22,7 +22,7 @@ import type { TaskArguments } from "hardhat/types";
  *      --employees 0xALICE,0xBOB \
  *      --amounts 5000,7000
  *
- * 5. Decrypt your own balance (must be called as the employee — use signer index):
+ * 5. Decrypt your own balance (must be called as the employee - use signer index):
  *    npx hardhat --network sepolia payroll:my-balance --signer 1
  *    (signer 0 = employer/deployer, signer 1 = first account from mnemonic, etc.)
  *
@@ -37,9 +37,9 @@ import type { TaskArguments } from "hardhat/types";
 
 const CONTRACT_ADDRESS = "0xB482f89B468a9E9Ea8AFA38C09e83d0430D93De2";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// payroll:employees — list all registered employees
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// payroll:employees - list all registered employees
+// -----------------------------------------------------------------------------
 task("payroll:employees", "Lists all registered employees in the ConfidentialPayroll contract").setAction(
   async function (_taskArguments: TaskArguments, hre) {
     const { ethers } = hre;
@@ -52,17 +52,17 @@ task("payroll:employees", "Lists all registered employees in the ConfidentialPay
       return;
     }
 
-    console.log(`\n${"─".repeat(50)}`);
+    console.log(`\n${"-".repeat(50)}`);
     console.log(`ConfidentialPayroll: ${CONTRACT_ADDRESS}`);
     console.log(`Registered employees (${employees.length}):`);
     employees.forEach((addr, i) => console.log(`  [${i}] ${addr}`));
-    console.log(`${"─".repeat(50)}\n`);
+    console.log(`${"-".repeat(50)}\n`);
   },
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
-// payroll:add-employee — register a single employee address
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// payroll:add-employee - register a single employee address
+// -----------------------------------------------------------------------------
 task("payroll:add-employee", "Registers an employee address (called by employer/deployer)")
   .addParam("address", "The employee wallet address to register")
   .setAction(async function (taskArguments: TaskArguments, hre) {
@@ -78,7 +78,7 @@ task("payroll:add-employee", "Registers an employee address (called by employer/
     // Check if already registered to give a clear message
     const alreadyEmployee: boolean = await payroll.isEmployee(employeeAddr);
     if (alreadyEmployee) {
-      console.log(`⚠  ${employeeAddr} is already a registered employee.`);
+      console.log(`Warning  ${employeeAddr} is already a registered employee.`);
       return;
     }
 
@@ -87,16 +87,16 @@ task("payroll:add-employee", "Registers an employee address (called by employer/
     console.log(`  Tx sent: ${tx.hash}`);
     console.log(`  Waiting for confirmation...`);
     const receipt = await tx.wait();
-    console.log(`  ✓ Confirmed in block ${receipt?.blockNumber} (status=${receipt?.status})`);
+    console.log(`  OK Confirmed in block ${receipt?.blockNumber} (status=${receipt?.status})`);
     console.log(`  Employee ${employeeAddr} registered successfully.`);
   });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// payroll:run — run payroll for a single employee
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// payroll:run - run payroll for a single employee
+// -----------------------------------------------------------------------------
 task("payroll:run", "Encrypts a salary amount and pays a single employee")
   .addParam("employee", "The employee wallet address")
-  .addParam("amount", "The salary amount in units (plaintext — encrypted in this script before sending)")
+  .addParam("amount", "The salary amount in units (plaintext - encrypted in this script before sending)")
   .setAction(async function (taskArguments: TaskArguments, hre) {
     const { ethers, fhevm } = hre;
 
@@ -132,14 +132,14 @@ task("payroll:run", "Encrypts a salary amount and pays a single employee")
 
     console.log(`\nStep 3/3: Waiting for block confirmation...`);
     const receipt = await tx.wait();
-    console.log(`  ✓ Confirmed in block ${receipt?.blockNumber} (status=${receipt?.status})`);
-    console.log(`\n✓ Payroll complete. ${taskArguments.employee} has been paid ${amount} units (encrypted on-chain).`);
-    console.log(`  The employer (${employer.address}) cannot decrypt this amount — only the employee can.`);
+    console.log(`  OK Confirmed in block ${receipt?.blockNumber} (status=${receipt?.status})`);
+    console.log(`\nOK Payroll complete. ${taskArguments.employee} has been paid ${amount} units (encrypted on-chain).`);
+    console.log(`  The employer (${employer.address}) cannot decrypt this amount - only the employee can.`);
   });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// payroll:run-batch — run payroll for multiple employees in one transaction
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// payroll:run-batch - run payroll for multiple employees in one transaction
+// -----------------------------------------------------------------------------
 task("payroll:run-batch", "Encrypts and pays multiple employees in a single transaction")
   .addParam("employees", "Comma-separated employee addresses (no spaces)")
   .addParam("amounts", "Comma-separated amounts matching the employees order (no spaces)")
@@ -163,7 +163,7 @@ task("payroll:run-batch", "Encrypts and pays multiple employees in a single tran
     const employer = signers[0];
     console.log(`Employer: ${employer.address}`);
     console.log(`\nPayroll batch (${employeeAddrs.length} employees):`);
-    employeeAddrs.forEach((addr, i) => console.log(`  ${addr}  →  ${amounts[i]} units`));
+    employeeAddrs.forEach((addr, i) => console.log(`  ${addr}  ->  ${amounts[i]} units`));
 
     const payroll = await ethers.getContractAt("ConfidentialPayroll", CONTRACT_ADDRESS, employer);
 
@@ -175,7 +175,7 @@ task("payroll:run-batch", "Encrypts and pays multiple employees in a single tran
       const enc = await fhevm.createEncryptedInput(CONTRACT_ADDRESS, employer.address).add32(amounts[i]).encrypt();
       allHandles.push(enc.handles[0]);
       allProofs.push(enc.inputProof);
-      console.log(`  [${i}] ${employeeAddrs[i]}: encrypted ✓`);
+      console.log(`  [${i}] ${employeeAddrs[i]}: encrypted OK`);
     }
 
     console.log(`\nStep 2/3: Broadcasting batch runPayroll transaction...`);
@@ -184,17 +184,17 @@ task("payroll:run-batch", "Encrypts and pays multiple employees in a single tran
 
     console.log(`\nStep 3/3: Waiting for block confirmation...`);
     const receipt = await tx.wait();
-    console.log(`  ✓ Confirmed in block ${receipt?.blockNumber} (status=${receipt?.status})`);
+    console.log(`  OK Confirmed in block ${receipt?.blockNumber} (status=${receipt?.status})`);
 
-    console.log(`\n✓ Batch payroll complete!`);
+    console.log(`\nOK Batch payroll complete!`);
     employeeAddrs.forEach((addr, i) =>
-      console.log(`  ${addr}  →  ${amounts[i]} units (encrypted, only employee can decrypt)`),
+      console.log(`  ${addr}  ->  ${amounts[i]} units (encrypted, only employee can decrypt)`),
     );
   });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// payroll:my-balance — decrypt the calling employee's own balance
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// payroll:my-balance - decrypt the calling employee's own balance
+// -----------------------------------------------------------------------------
 task("payroll:my-balance", "Decrypts and displays the employee's own salary balance")
   .addOptionalParam("signer", "Signer index from your mnemonic (0=employer, 1=first employee, etc.)", "1")
   .setAction(async function (taskArguments: TaskArguments, hre) {
@@ -218,7 +218,7 @@ task("payroll:my-balance", "Decrypts and displays the employee's own salary bala
 
     const isRegistered: boolean = await payroll.isEmployee(employee.address);
     if (!isRegistered) {
-      console.log(`\n⚠  ${employee.address} is not a registered employee.`);
+      console.log(`\nWarning  ${employee.address} is not a registered employee.`);
       console.log(
         `   Ask the employer to run: npx hardhat --network sepolia payroll:add-employee --address ${employee.address}`,
       );
@@ -229,7 +229,7 @@ task("payroll:my-balance", "Decrypts and displays the employee's own salary bala
     const encryptedBalance = await payroll.getMyBalance();
 
     if (encryptedBalance === ethers.ZeroHash) {
-      console.log(`  Encrypted handle: ${encryptedBalance} (zero — no payroll run yet)`);
+      console.log(`  Encrypted handle: ${encryptedBalance} (zero - no payroll run yet)`);
       console.log(`  Clear balance   : 0`);
       return;
     }
@@ -240,17 +240,17 @@ task("payroll:my-balance", "Decrypts and displays the employee's own salary bala
 
     const clearBalance = await fhevm.userDecryptEuint(FhevmType.euint32, encryptedBalance, CONTRACT_ADDRESS, employee);
 
-    console.log(`\n${"═".repeat(50)}`);
+    console.log(`\n${"=".repeat(50)}`);
     console.log(`  Employee  : ${employee.address}`);
     console.log(`  Balance   : ${clearBalance} units`);
-    console.log(`${"═".repeat(50)}`);
-    console.log(`\n✓ Decryption authorized by employee wallet signature.`);
+    console.log(`${"=".repeat(50)}`);
+    console.log(`\nOK Decryption authorized by employee wallet signature.`);
     console.log(`  No other address (including the employer) can see this value.`);
   });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// payroll:withdraw — zero the calling employee's balance (simulate payout)
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// payroll:withdraw - zero the calling employee's balance (simulate payout)
+// -----------------------------------------------------------------------------
 task("payroll:withdraw", "Zeros the employee's on-chain balance (simulates a payout claim)")
   .addOptionalParam("signer", "Signer index from your mnemonic (0=employer, 1=first employee, etc.)", "1")
   .setAction(async function (taskArguments: TaskArguments, hre) {
@@ -267,6 +267,6 @@ task("payroll:withdraw", "Zeros the employee's on-chain balance (simulates a pay
     const tx = await payroll.withdraw();
     console.log(`  Tx sent: ${tx.hash}`);
     const receipt = await tx.wait();
-    console.log(`  ✓ Confirmed in block ${receipt?.blockNumber}`);
-    console.log(`\n✓ Balance zeroed. Run payroll:my-balance to confirm it's now 0.`);
+    console.log(`  OK Confirmed in block ${receipt?.blockNumber}`);
+    console.log(`\nOK Balance zeroed. Run payroll:my-balance to confirm it's now 0.`);
   });

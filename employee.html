@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ConfidentialPayroll — Employee Dashboard</title>
+    <title>ConfidentialPayroll - Employee Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -42,7 +42,7 @@
         min-height: 100vh;
       }
 
-      /* ── Header ── */
+      /* -- Header -- */
       header {
         display: flex;
         align-items: center;
@@ -152,7 +152,7 @@
         cursor: default;
       }
 
-      /* ── FHE bar ── */
+      /* -- FHE bar -- */
       #fheBar {
         display: none;
         align-items: center;
@@ -185,7 +185,7 @@
         }
       }
 
-      /* ── Page ── */
+      /* -- Page -- */
       .page-wrap {
         max-width: 640px;
         margin: 0 auto;
@@ -220,7 +220,7 @@
         white-space: nowrap;
       }
 
-      /* ── Balance hero ── */
+      /* -- Balance hero -- */
       .balance-hero {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -262,7 +262,7 @@
         border-radius: 6px;
       }
 
-      /* ── Cards ── */
+      /* -- Cards -- */
       .card {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -282,7 +282,7 @@
         line-height: 1.5;
       }
 
-      /* ── Form ── */
+      /* -- Form -- */
       label {
         display: block;
         font-size: 11px;
@@ -311,7 +311,7 @@
         margin-bottom: 14px;
       }
 
-      /* ── Buttons ── */
+      /* -- Buttons -- */
       .btn {
         display: inline-flex;
         align-items: center;
@@ -368,7 +368,7 @@
         margin-top: 0;
       }
 
-      /* ── Result box ── */
+      /* -- Result box -- */
       .result-box {
         background: var(--bg);
         border: 1px solid var(--border);
@@ -399,14 +399,14 @@
         color: #2dd4bf;
       }
 
-      /* ── Divider ── */
+      /* -- Divider -- */
       hr {
         border: none;
         border-top: 1px solid var(--border);
         margin: 24px 0;
       }
 
-      /* ── Locked state ── */
+      /* -- Locked state -- */
       .locked-state {
         display: flex;
         flex-direction: column;
@@ -428,12 +428,12 @@
         font-size: 24px;
       }
 
-      /* ── SDK badge ── */
+      /* -- SDK badge -- */
       #sdkBadge {
         display: none;
       }
 
-      /* ── Toast ── */
+      /* -- Toast -- */
       #toast {
         position: fixed;
         bottom: 24px;
@@ -521,11 +521,13 @@
           <div class="page-title">Employee Dashboard</div>
           <div class="page-sub">
             Connect your registered wallet to decrypt your confidential salary balance. Only your wallet can authorize
-            this — not your employer, not other employees.
+            this - not your employer, not other employees.
           </div>
         </div>
         <span class="role-badge">EMPLOYEE</span>
       </div>
+
+      <div class="result-box" id="roleStatus" style="display: none; margin-bottom: 16px"></div>
 
       <!-- Locked state -->
       <div id="lockedState">
@@ -551,14 +553,14 @@
         <!-- Balance hero -->
         <div class="balance-hero">
           <div class="balance-label">Your Confidential Balance</div>
-          <div class="balance-number" id="balanceDisplay">—</div>
+          <div class="balance-number" id="balanceDisplay">-</div>
           <div class="balance-unit">units (encrypted on-chain)</div>
           <button class="btn btn-teal" id="decryptBtn" onclick="decryptBalance()">&#128275; Decrypt My Balance</button>
           <div class="result-box" id="decryptResult" style="text-align: left; margin-top: 16px">
-            Your balance is stored as a ciphertext. Click above — the Zama KMS relayer will ask you to sign an EIP-712
+            Your balance is stored as a ciphertext. Click above - the Zama KMS relayer will ask you to sign an EIP-712
             message, then return only your plaintext balance.
           </div>
-          <div class="balance-handle" id="handleDisplay">Encrypted handle: loading…</div>
+          <div class="balance-handle" id="handleDisplay">Encrypted handle: loading...</div>
         </div>
 
         <hr />
@@ -568,14 +570,14 @@
           <div class="card-title">&#128270; Privacy Verification</div>
           <div class="card-sub">
             Paste any other employee's wallet address and attempt to decrypt their balance using your wallet. The Zama
-            KMS will reject the request — proving salary isolation is enforced cryptographically, not just in this UI.
+            KMS will reject the request - proving salary isolation is enforced cryptographically, not just in this UI.
           </div>
           <div class="field">
             <label>Target Address (another employee)</label>
-            <input type="text" id="proofTarget" placeholder="0x… paste someone else's address" />
+            <input type="text" id="proofTarget" placeholder="0x... paste someone else's address" />
           </div>
           <button class="btn btn-outline-teal btn-sm" onclick="provePrivacy()">Attempt Unauthorized Decrypt</button>
-          <div class="result-box" id="proofResult">Result will appear here — expect an access denial.</div>
+          <div class="result-box" id="proofResult">Result will appear here - expect an access denial.</div>
         </div>
 
         <hr />
@@ -584,11 +586,11 @@
         <div class="card" style="border-color: rgba(220, 38, 38, 0.3)">
           <div class="card-title">Claim / Withdraw</div>
           <div class="card-sub">
-            Zeros your encrypted on-chain balance, simulating a payout claim. In a production system this would trigger
-            an ERC-7984 confidential token transfer to your wallet.
+            Zeros your encrypted on-chain balance, simulating a payout claim. This demo does not transfer tokens yet;
+            it proves the encrypted balance can be claimed and reset by the employee wallet.
           </div>
           <button class="btn btn-danger-outline" id="withdrawBtn" onclick="withdraw()">&#8659; Withdraw Balance</button>
-          <div class="result-box" id="withdrawResult">—</div>
+          <div class="result-box" id="withdrawResult">-</div>
         </div>
       </div>
     </div>
@@ -603,11 +605,12 @@
         "function getMyBalance() external view returns (bytes32)",
         "function getBalanceHandle(address employee) external view returns (bytes32)",
         "function isEmployee(address) external view returns (bool)",
+        "function employer() external view returns (address)",
         "function withdraw() external",
         "event Withdrawal(address indexed employee)",
       ];
 
-      let provider, signer, contract, fhevmInstance, walletAddress;
+      let provider, signer, contract, fhevmInstance, walletAddress, employerAddress;
 
       import { BrowserProvider, Contract, ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.min.js";
 
@@ -661,9 +664,9 @@
       window.connectWallet = async function () {
         const btn = document.getElementById("connectBtn");
         btn.disabled = true;
-        btn.textContent = "Connecting…";
+        btn.textContent = "Connecting...";
         try {
-          if (!window.ethereum) throw new Error("MetaMask not found — install it from metamask.io");
+          if (!window.ethereum) throw new Error("MetaMask not found - install it from metamask.io");
           provider = new BrowserProvider(window.ethereum);
           await provider.send("eth_requestAccounts", []);
           const net = await provider.getNetwork();
@@ -675,7 +678,7 @@
           walletAddress = await signer.getAddress();
           contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
 
-          document.getElementById("walletAddr").textContent = walletAddress.slice(0, 6) + "…" + walletAddress.slice(-4);
+          document.getElementById("walletAddr").textContent = walletAddress.slice(0, 6) + "..." + walletAddress.slice(-4);
           document.getElementById("netDot").classList.add("live");
           document.getElementById("netLabel").textContent = "Sepolia";
           btn.textContent = "Connected";
@@ -684,13 +687,14 @@
           document.getElementById("mainContent").style.display = "block";
 
           toast("Wallet connected", "ok");
+          await updateEmployeeRoleStatus();
 
           // Load balance handle immediately (no SDK needed)
           await fetchBalanceHandle();
 
           // Init SDK in background
           setSdkBadge("loading");
-          setFheBar(true, "Loading Zama FHEVM SDK…");
+          setFheBar(true, "Loading Zama FHEVM SDK...");
           initFhevmSDK();
         } catch (err) {
           btn.disabled = false;
@@ -701,20 +705,36 @@
       };
       document.getElementById("connectBtn").addEventListener("click", window.connectWallet);
 
+      async function updateEmployeeRoleStatus() {
+        const roleStatus = document.getElementById("roleStatus");
+        employerAddress = await contract.employer();
+        const isRegistered = await contract.isEmployee(walletAddress);
+        const isEmployer = walletAddress.toLowerCase() === employerAddress.toLowerCase();
+        roleStatus.style.display = "block";
+        roleStatus.className = "result-box " + (isRegistered ? "success" : "error");
+        if (isRegistered) {
+          roleStatus.textContent = "Connected as a registered employee. You can decrypt and claim your own balance.";
+          return;
+        }
+        roleStatus.textContent = isEmployer
+          ? "Connected as employer. Use the employer dashboard for payroll actions, or connect an employee wallet here."
+          : "This wallet is not registered as an employee yet. Ask the employer to add it before decrypting or withdrawing.";
+      }
+
       async function initFhevmSDK() {
         try {
           const sdk = await loadFhevmSDK();
-          setFheBar(true, "Initializing encryption runtime…");
+          setFheBar(true, "Initializing encryption runtime...");
           await sdk.initSDK({
             tfheParams: `${window.relayerSDKBaseUrl}/tfhe_bg.wasm`,
             kmsParams: `${window.relayerSDKBaseUrl}/kms_lib_bg.wasm`,
           });
-          setFheBar(true, "Connecting to Zama KMS relayer…");
+          setFheBar(true, "Connecting to Zama KMS relayer...");
           const inst = await sdk.createInstance({ ...sdk.SepoliaConfig, network: window.ethereum });
           fhevmInstance = wrapRelayerInstance(inst);
           setSdkBadge("ready");
           setFheBar(false);
-          toast("FHE SDK ready — you can now decrypt your balance", "ok");
+          toast("FHE SDK ready - you can now decrypt your balance", "ok");
         } catch (err) {
           setSdkBadge("error");
           setFheBar(false);
@@ -729,7 +749,7 @@
         const label = document.getElementById("sdkLabel");
         badge.style.display = "flex";
         const map = {
-          loading: ["orange", "SDK loading…"],
+          loading: ["orange", "SDK loading..."],
           ready: ["var(--success)", "FHE ready"],
           error: ["var(--danger)", "SDK error"],
         };
@@ -753,24 +773,24 @@
         const display = document.getElementById("balanceDisplay");
         const btn = document.getElementById("decryptBtn");
         if (!contract) return toast("Connect wallet first", "err");
-        if (!fhevmInstance) return toast("FHE SDK still loading — watch the header badge", "err");
+        if (!fhevmInstance) return toast("FHE SDK still loading - watch the header badge", "err");
 
         btn.disabled = true;
-        setFheBar(true, "Fetching encrypted handle from contract…");
+        setFheBar(true, "Fetching encrypted handle from contract...");
         res.className = "result-box info";
-        res.textContent = "Fetching your encrypted balance handle…";
+        res.textContent = "Fetching your encrypted balance handle...";
 
         try {
           const handle = await fetchBalanceHandle();
           if (!handle || handle === ethers.ZeroHash) {
             res.className = "result-box error";
-            res.textContent = "Balance is zero — your employer hasn't run payroll for your address yet.";
+            res.textContent = "Balance is zero - your employer hasn't run payroll for your address yet.";
             display.textContent = "0";
             return;
           }
 
-          res.textContent = "Handle fetched. Requesting KMS decryption — approve the signature in MetaMask…";
-          setFheBar(true, "Waiting for EIP-712 signature in MetaMask…");
+          res.textContent = "Handle fetched. Requesting KMS decryption - approve the signature in MetaMask...";
+          setFheBar(true, "Waiting for EIP-712 signature in MetaMask...");
 
           const clear = await fhevmInstance.userDecryptEuint32(handle, CONTRACT_ADDRESS, signer);
 
@@ -779,7 +799,7 @@
           res.textContent =
             "Decrypted successfully.\nYour balance: " +
             clear +
-            " units.\n\nOnly your wallet could authorize this — your employer cannot see this value.";
+            " units.\n\nOnly your wallet could authorize this - your employer cannot see this value.";
           toast("Balance decrypted: " + clear + " units", "ok");
         } catch (err) {
           res.className = "result-box error";
@@ -798,18 +818,18 @@
         const target = document.getElementById("proofTarget").value.trim();
         const res = document.getElementById("proofResult");
         if (!contract) return toast("Connect wallet first", "err");
-        if (!fhevmInstance) return toast("FHE SDK not ready — wait for the header badge", "err");
+        if (!fhevmInstance) return toast("FHE SDK not ready - wait for the header badge", "err");
         if (!ethers.isAddress(target)) return toast("Enter a valid 0x address", "err");
         if (target.toLowerCase() === walletAddress.toLowerCase()) return toast("Enter someone else's address", "err");
 
         res.className = "result-box info";
-        res.textContent = "Fetching target's encrypted handle…";
-        setFheBar(true, "Attempting unauthorized decryption (expecting rejection)…");
+        res.textContent = "Fetching target's encrypted handle...";
+        setFheBar(true, "Attempting unauthorized decryption (expecting rejection)...");
 
         try {
           const handle = await contract.getBalanceHandle(target);
           res.textContent =
-            "Handle fetched: " + handle.slice(0, 20) + "…\nAttempting decrypt with your wallet (unauthorized)…";
+            "Handle fetched: " + handle.slice(0, 20) + "...\nAttempting decrypt with your wallet (unauthorized)...";
           await fhevmInstance.userDecryptEuint32(handle, CONTRACT_ADDRESS, signer);
           // Should never reach here
           res.className = "result-box error";
@@ -820,16 +840,16 @@
             res.textContent = "You cancelled the MetaMask signature.";
             return;
           }
-          // Expected — KMS rejected unauthorized request
+          // Expected - KMS rejected unauthorized request
           res.className = "result-box success";
           res.textContent =
-            "Access DENIED by Zama KMS relayer — as expected.\n\n" +
+            "Access DENIED by Zama KMS relayer - as expected.\n\n" +
             "Your wallet (" +
             walletAddress.slice(0, 10) +
-            "…) was never granted FHE.allow() " +
+            "...) was never granted FHE.allow() " +
             "permission for this employee's balance ciphertext.\n\n" +
             "This confirms salary isolation is enforced at the cryptographic layer, not just in this UI.";
-          toast("Privacy proven — KMS rejected unauthorized decrypt", "ok");
+          toast("Privacy proven - KMS rejected unauthorized decrypt", "ok");
         } finally {
           setFheBar(false);
         }
@@ -841,14 +861,14 @@
         if (!contract) return toast("Connect wallet first", "err");
         btn.disabled = true;
         res.className = "result-box info";
-        res.textContent = "Sending withdrawal transaction…";
-        setFheBar(true, "Processing withdrawal…");
+        res.textContent = "Sending withdrawal transaction...";
+        setFheBar(true, "Processing withdrawal...");
         try {
           const tx = await contract.withdraw();
           res.textContent = "Tx sent: " + tx.hash;
           await tx.wait();
           res.className = "result-box success";
-          res.textContent = "Withdrawal complete — balance zeroed.\nTx: " + tx.hash;
+          res.textContent = "Withdrawal complete - balance zeroed.\nTx: " + tx.hash;
           document.getElementById("balanceDisplay").textContent = "0";
           toast("Balance withdrawn and zeroed", "ok");
         } catch (e) {
