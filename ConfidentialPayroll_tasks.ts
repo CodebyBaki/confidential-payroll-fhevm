@@ -117,10 +117,7 @@ task("payroll:run", "Encrypts a salary amount and pays a single employee")
     const payroll = await ethers.getContractAt("ConfidentialPayroll", CONTRACT_ADDRESS, employer);
 
     console.log(`\nStep 1/3: Encrypting amount ${amount} with ZK proof...`);
-    const encryptedInput = await fhevm
-      .createEncryptedInput(CONTRACT_ADDRESS, employer.address)
-      .add32(amount)
-      .encrypt();
+    const encryptedInput = await fhevm.createEncryptedInput(CONTRACT_ADDRESS, employer.address).add32(amount).encrypt();
 
     console.log(`  Handle: ${encryptedInput.handles[0]}`);
     console.log(`  Proof : ${encryptedInput.inputProof.slice(0, 20)}... (truncated)`);
@@ -175,10 +172,7 @@ task("payroll:run-batch", "Encrypts and pays multiple employees in a single tran
     const allProofs: Uint8Array[] = [];
 
     for (let i = 0; i < employeeAddrs.length; i++) {
-      const enc = await fhevm
-        .createEncryptedInput(CONTRACT_ADDRESS, employer.address)
-        .add32(amounts[i])
-        .encrypt();
+      const enc = await fhevm.createEncryptedInput(CONTRACT_ADDRESS, employer.address).add32(amounts[i]).encrypt();
       allHandles.push(enc.handles[0]);
       allProofs.push(enc.inputProof);
       console.log(`  [${i}] ${employeeAddrs[i]}: encrypted ✓`);
@@ -225,7 +219,9 @@ task("payroll:my-balance", "Decrypts and displays the employee's own salary bala
     const isRegistered: boolean = await payroll.isEmployee(employee.address);
     if (!isRegistered) {
       console.log(`\n⚠  ${employee.address} is not a registered employee.`);
-      console.log(`   Ask the employer to run: npx hardhat --network sepolia payroll:add-employee --address ${employee.address}`);
+      console.log(
+        `   Ask the employer to run: npx hardhat --network sepolia payroll:add-employee --address ${employee.address}`,
+      );
       return;
     }
 

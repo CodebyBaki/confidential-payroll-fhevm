@@ -2,45 +2,57 @@
 
 > **Zama Developer Program Mainnet Season 3 — Builder Track submission**
 
-A confidential payroll dApp built on Zama's FHEVM. An employer runs payroll for a batch of employees in a single transaction. Every salary amount stays **encrypted on-chain** — employees can decrypt only their own balance, and the employer who set the amounts can never read them back.
+A confidential payroll dApp built on Zama's FHEVM. An employer runs payroll for a batch of employees in a single
+transaction. Every salary amount stays **encrypted on-chain** — employees can decrypt only their own balance, and the
+employer who set the amounts can never read them back.
 
 ## Live Deployment (Sepolia)
 
-| | |
-|---|---|
+|              |                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
 | **Contract** | [`0xB482f89B468a9E9Ea8AFA38C09e83d0430D93De2`](https://sepolia.etherscan.io/address/0xB482f89B468a9E9Ea8AFA38C09e83d0430D93De2) |
-| **Network** | Ethereum Sepolia Testnet |
-| **Deployer** | `0xe769489403ecdda0e2da0184723e8b80ec88c364` |
+| **Network**  | Ethereum Sepolia Testnet                                                                                                        |
+| **Deployer** | `0xe769489403ecdda0e2da0184723e8b80ec88c364`                                                                                    |
 
 ## What it does
 
-One employer, N employees. The employer calls `runPayroll(employees[], encryptedAmounts[], proofs[])` — a single transaction that updates each employee's encrypted balance using FHE addition. No plaintext salary value ever appears on-chain or in the transaction data.
+One employer, N employees. The employer calls `runPayroll(employees[], encryptedAmounts[], proofs[])` — a single
+transaction that updates each employee's encrypted balance using FHE addition. No plaintext salary value ever appears
+on-chain or in the transaction data.
 
 After payroll runs:
-- **Employee A** connects their wallet, requests decryption via the Zama KMS relayer, signs an EIP-712 message — sees their own balance.
+
+- **Employee A** connects their wallet, requests decryption via the Zama KMS relayer, signs an EIP-712 message — sees
+  their own balance.
 - **Employee B** does the same — sees only their own balance, a different number.
-- **Anyone else** (including the employer, block explorers, other employees) attempting to decrypt Employee A's ciphertext handle gets rejected by the KMS relayer — because `FHE.allow()` was never granted to them.
+- **Anyone else** (including the employer, block explorers, other employees) attempting to decrypt Employee A's
+  ciphertext handle gets rejected by the KMS relayer — because `FHE.allow()` was never granted to them.
 
 This is enforced cryptographically at the KMS layer, not just in the UI.
 
 ## Key design decisions
 
-**Asymmetric ACL** — the employer encrypts each salary amount and submits it, but is never granted `FHE.allow` on the resulting ciphertext. The employer is write-only: they can pay employees but can never see individual salaries. This is a stronger privacy property than most FHEVM examples, where the encrypting address can usually decrypt back.
+**Asymmetric ACL** — the employer encrypts each salary amount and submits it, but is never granted `FHE.allow` on the
+resulting ciphertext. The employer is write-only: they can pay employees but can never see individual salaries. This is
+a stronger privacy property than most FHEVM examples, where the encrypting address can usually decrypt back.
 
-**Batch payroll in one transaction** — `runPayroll` loops over N employees and applies `FHE.add` to each encrypted balance independently, with correct `FHE.allowThis` + `FHE.allow(newBalance, employee)` after every write. This demonstrates composable encrypted state across multiple ciphertexts, not just a single counter.
+**Batch payroll in one transaction** — `runPayroll` loops over N employees and applies `FHE.add` to each encrypted
+balance independently, with correct `FHE.allowThis` + `FHE.allow(newBalance, employee)` after every write. This
+demonstrates composable encrypted state across multiple ciphertexts, not just a single counter.
 
-**Accumulating state** — balances accumulate across multiple payroll runs, proving FHE arithmetic composes correctly over time.
+**Accumulating state** — balances accumulate across multiple payroll runs, proving FHE arithmetic composes correctly
+over time.
 
 ## Contract interface
 
-| Function | Caller | Description |
-|---|---|---|
-| `addEmployee(address)` | employer | Register employee, initialize encrypted balance to 0 |
-| `runPayroll(address[], externalEuint32[], bytes[])` | employer | Batch-pay employees with encrypted amounts |
-| `getMyBalance()` | registered employee | Returns own encrypted balance handle |
-| `getBalanceHandle(address)` | anyone | Returns handle (not decryptable by non-authorized callers) |
-| `withdraw()` | registered employee | Zeros balance, simulating a payout claim |
-| `getEmployees()` | anyone | List all registered employee addresses |
+| Function                                            | Caller              | Description                                                |
+| --------------------------------------------------- | ------------------- | ---------------------------------------------------------- |
+| `addEmployee(address)`                              | employer            | Register employee, initialize encrypted balance to 0       |
+| `runPayroll(address[], externalEuint32[], bytes[])` | employer            | Batch-pay employees with encrypted amounts                 |
+| `getMyBalance()`                                    | registered employee | Returns own encrypted balance handle                       |
+| `getBalanceHandle(address)`                         | anyone              | Returns handle (not decryptable by non-authorized callers) |
+| `withdraw()`                                        | registered employee | Zeros balance, simulating a payout claim                   |
+| `getEmployees()`                                    | anyone              | List all registered employee addresses                     |
 
 ## Test suite
 
@@ -55,7 +67,8 @@ This is enforced cryptographically at the KMS layer, not just in the UI.
 ✔ rejects runPayroll with mismatched array lengths
 ```
 
-The third test is the critical one: it explicitly proves that Bob's wallet cannot decrypt Alice's ciphertext handle — the SDK call rejects, confirming ACL enforcement works end-to-end.
+The third test is the critical one: it explicitly proves that Bob's wallet cannot decrypt Alice's ciphertext handle —
+the SDK call rejects, confirming ACL enforcement works end-to-end.
 
 ## Running locally
 
@@ -98,7 +111,8 @@ npx serve .
 # open http://localhost:3000
 ```
 
-MetaMask required, set to Sepolia. The frontend uses the `@zama-fhe/relayer-sdk` for browser-side encryption and EIP-712 user decryption.
+MetaMask required, set to Sepolia. The frontend uses the `@zama-fhe/relayer-sdk` for browser-side encryption and EIP-712
+user decryption.
 
 ## Project structure
 
@@ -124,8 +138,6 @@ PAYROLL_README.md           ← extended notes and design rationale
 - [Hardhat](https://hardhat.org) + `@fhevm/hardhat-plugin`
 - ethers v6
 - Solidity 0.8.24
-
-
 
 # FHEVM Hardhat Template
 
