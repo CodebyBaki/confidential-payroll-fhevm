@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ConfidentialPayroll - Zama FHEVM</title>
+  <title>ConfidentialPayroll — Employer Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --bg:          #0d0f14;
       --surface:     #161921;
@@ -26,380 +24,204 @@
       --mono:        'JetBrains Mono', monospace;
       --sans:        'Inter', sans-serif;
     }
+    body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:14px; line-height:1.6; min-height:100vh; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 14px;
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-
-    /*  Header  */
+    /* ── Header ── */
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 32px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 40px; border-bottom:1px solid var(--border); background:var(--surface);
+      position:sticky; top:0; z-index:50;
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--mono);
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-    }
+    .logo { display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:15px; font-weight:600; }
     .logo-icon {
-      width: 28px; height: 28px;
-      background: linear-gradient(135deg, var(--employer), var(--employee));
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
+      width:30px; height:30px;
+      background:linear-gradient(135deg, var(--employer), var(--employee));
+      border-radius:7px; display:flex; align-items:center; justify-content:center;
+      font-size:13px; font-family:var(--mono); font-weight:700; color:#fff;
     }
-    .tag {
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 4px;
-      background: var(--employer-dim);
-      color: var(--employer);
-      border: 1px solid var(--employer);
-    }
-    .tag.employee { background: var(--employee-dim); color: var(--employee); border-color: var(--employee); }
 
-    .wallet-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    /* ── Nav tabs ── */
+    nav { display:flex; gap:4px; }
+    .nav-tab {
+      padding:7px 16px; border-radius:6px; font-size:13px; font-weight:500;
+      text-decoration:none; border:1px solid transparent; cursor:pointer;
+      transition:background .15s, color .15s;
     }
-    #walletAddr {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
+    .nav-tab.active-employer {
+      background:var(--employer-dim); color:var(--employer); border-color:var(--employer);
     }
+    .nav-tab.inactive {
+      color:var(--muted); border-color:var(--border);
+    }
+    .nav-tab.inactive:hover { background:var(--surface); color:var(--text); }
+
+    /* ── Wallet bar ── */
+    .wallet-bar { display:flex; align-items:center; gap:12px; }
+    .net-badge { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+    .net-dot { width:8px; height:8px; border-radius:50%; background:var(--muted); }
+    .net-dot.live { background:var(--success); }
+    #walletAddr { font-family:var(--mono); font-size:12px; color:var(--muted); }
+    #sdkBadge { display:none; }
     #connectBtn {
-      background: var(--employer);
-      color: #fff;
-      border: none;
-      padding: 8px 18px;
-      border-radius: 6px;
-      font-family: var(--sans);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: opacity .15s;
+      background:var(--employer); color:#fff; border:none;
+      padding:8px 18px; border-radius:6px; font-family:var(--sans);
+      font-size:13px; font-weight:500; cursor:pointer; transition:opacity .15s;
     }
-    #connectBtn:hover { opacity: .85; }
-    #connectBtn:disabled { opacity: .4; cursor: default; }
+    #connectBtn:hover { opacity:.85; }
+    #connectBtn:disabled { opacity:.4; cursor:default; }
 
-    /*  Network badge  */
-    .net-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .net-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--muted);
-    }
-    .net-dot.live { background: var(--success); }
-
-    /*  FHE status bar  */
+    /* ── FHE bar ── */
     #fheBar {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 32px;
-      background: #1a1230;
-      border-bottom: 1px solid var(--employer-dim);
-      font-size: 13px;
-      color: #a78bfa;
+      display:none; align-items:center; gap:10px;
+      padding:10px 40px; background:#1a1230; border-bottom:1px solid var(--employer-dim);
+      font-size:13px; color:#a78bfa;
     }
-    #fheBar.active { display: flex; }
+    #fheBar.active { display:flex; }
     .pulse-ring {
-      width: 12px; height: 12px;
-      border-radius: 50%;
-      background: var(--employer);
-      position: relative;
-      animation: pulse 1.2s ease-in-out infinite;
+      width:12px; height:12px; border-radius:50%; background:var(--employer);
+      animation:pulse 1.2s ease-in-out infinite;
     }
     @keyframes pulse {
-      0%   { box-shadow: 0 0 0 0 rgba(124,58,237,.7); }
-      70%  { box-shadow: 0 0 0 8px rgba(124,58,237,0); }
-      100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+      0%   { box-shadow:0 0 0 0 rgba(124,58,237,.7); }
+      70%  { box-shadow:0 0 0 8px rgba(124,58,237,0); }
+      100% { box-shadow:0 0 0 0 rgba(124,58,237,0); }
     }
 
-    /*  Main layout  */
-    main {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-      height: calc(100vh - 105px);
-      overflow: hidden;
+    /* ── Page layout ── */
+    .page-wrap { max-width:960px; margin:0 auto; padding:36px 40px 80px; }
+
+    .page-title-row {
+      display:flex; align-items:flex-start; justify-content:space-between;
+      margin-bottom:32px; padding-bottom:24px; border-bottom:1px solid var(--border);
+    }
+    .page-title { font-size:22px; font-weight:600; }
+    .page-sub { font-size:13px; color:var(--muted); margin-top:4px; }
+    .role-badge {
+      font-family:var(--mono); font-size:11px; padding:3px 10px;
+      border-radius:4px; background:var(--employer-dim);
+      color:var(--employer); border:1px solid var(--employer); white-space:nowrap;
     }
 
-    .panel {
-      padding: 28px 32px;
-      overflow-y: auto;
-      border-right: 1px solid var(--border);
-    }
-    .panel:last-child { border-right: none; }
+    /* ── Two-column content grid ── */
+    .content-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+    .content-col { display:flex; flex-direction:column; gap:20px; }
+    .full-width { grid-column:1/-1; }
 
-    .panel-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
+    /* ── Cards ── */
+    .card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; padding:20px;
     }
-    .panel-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .panel-sub {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
+    .card-title { font-size:13px; font-weight:600; margin-bottom:14px; }
+    .card-sub { font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.5; }
 
-    /*  Form controls  */
+    /* ── Form ── */
     label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      margin-bottom: 6px;
+      display:block; font-size:11px; font-weight:500; color:var(--muted);
+      text-transform:uppercase; letter-spacing:.07em; margin-bottom:6px;
     }
     input[type="text"], input[type="number"] {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 9px 12px;
-      font-family: var(--mono);
-      font-size: 13px;
-      color: var(--text);
-      outline: none;
-      transition: border-color .15s;
+      width:100%; background:var(--bg); border:1px solid var(--border); border-radius:6px;
+      padding:9px 12px; font-family:var(--mono); font-size:13px; color:var(--text);
+      outline:none; transition:border-color .15s;
     }
-    input:focus { border-color: var(--employer); }
-    .employee-panel input:focus { border-color: var(--employee); }
+    input:focus { border-color:var(--employer); }
+    .field { margin-bottom:14px; }
 
-    .field { margin-bottom: 16px; }
-
-    /*  Employee row  */
+    /* ── Payroll rows ── */
     .emp-row {
-      display: grid;
-      grid-template-columns: 1fr 130px 36px;
-      gap: 8px;
-      align-items: end;
-      margin-bottom: 10px;
+      display:grid; grid-template-columns:1fr 120px;
+      gap:8px; margin-bottom:10px; align-items:end;
     }
-    .emp-row input[type="number"] { padding: 9px 10px; }
+    .emp-row input[type="number"] { padding:9px 10px; }
 
-    .btn-icon {
-      width: 36px; height: 36px;
-      background: var(--danger);
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: opacity .15s;
-    }
-    .btn-icon:hover { opacity: .8; }
-
-    /*  Buttons  */
+    /* ── Buttons ── */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      font-family: var(--sans);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: opacity .15s, transform .1s;
-      width: 100%;
-      margin-top: 4px;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 20px; border:none; border-radius:7px; font-family:var(--sans);
+      font-size:13px; font-weight:500; cursor:pointer;
+      transition:opacity .15s, transform .1s; width:100%; margin-top:4px;
     }
-    .btn:active { transform: scale(.98); }
-    .btn:disabled { opacity: .4; cursor: default; transform: none; }
+    .btn:active { transform:scale(.98); }
+    .btn:disabled { opacity:.4; cursor:default; transform:none; }
+    .btn-primary { background:var(--employer); color:#fff; }
+    .btn-primary:hover:not(:disabled) { opacity:.88; }
+    .btn-outline { background:transparent; color:var(--employer); border:1px solid var(--employer); }
+    .btn-outline:hover:not(:disabled) { background:var(--employer-dim); }
+    .btn-sm { padding:7px 14px; font-size:12px; width:auto; margin-top:0; }
 
-    .btn-primary {
-      background: var(--employer);
-      color: #fff;
-    }
-    .btn-primary:hover:not(:disabled) { opacity: .88; }
-
-    .btn-teal {
-      background: var(--employee);
-      color: #fff;
-    }
-    .btn-teal:hover:not(:disabled) { opacity: .88; }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--employer);
-      border: 1px solid var(--employer);
-    }
-    .btn-outline:hover:not(:disabled) { background: var(--employer-dim); }
-
-    .btn-outline-teal {
-      background: transparent;
-      color: var(--employee);
-      border: 1px solid var(--employee);
-    }
-    .btn-outline-teal:hover:not(:disabled) { background: var(--employee-dim); }
-
-    .btn-sm {
-      padding: 7px 14px;
-      font-size: 12px;
-      width: auto;
-      margin-top: 0;
-    }
-
-    /*  Cards / result boxes  */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
+    /* ── Result box ── */
     .result-box {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px 14px;
-      font-family: var(--mono);
-      font-size: 13px;
-      word-break: break-all;
-      margin-top: 10px;
-      color: var(--muted);
-      min-height: 42px;
+      background:var(--bg); border:1px solid var(--border); border-radius:6px;
+      padding:12px 14px; font-family:var(--mono); font-size:12px;
+      word-break:break-all; margin-top:12px; color:var(--muted); min-height:40px;
+      white-space:pre-wrap;
     }
-    .result-box.success { border-color: var(--success); color: #4ade80; }
-    .result-box.error   { border-color: var(--danger);  color: #f87171; }
-    .result-box.info    { border-color: var(--employer); color: #a78bfa; }
-    .result-box.teal    { border-color: var(--employee); color: #2dd4bf; }
+    .result-box.success { border-color:var(--success); color:#4ade80; }
+    .result-box.error   { border-color:var(--danger);  color:#f87171; }
+    .result-box.info    { border-color:var(--employer); color:#a78bfa; }
 
-    /*  Balance display  */
-    .balance-big {
-      text-align: center;
-      padding: 24px 0 16px;
-    }
-    .balance-amount {
-      font-family: var(--mono);
-      font-size: 42px;
-      font-weight: 600;
-      color: var(--employee);
-      line-height: 1;
-    }
-    .balance-unit {
-      font-size: 14px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-    .balance-handle {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 10px;
-      word-break: break-all;
-      text-align: left;
-    }
-
-    /*  Employee list  */
+    /* ── Employee list ── */
     .emp-list-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      margin-bottom: 8px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; background:var(--bg); border:1px solid var(--border);
+      border-radius:6px; margin-bottom:8px; font-family:var(--mono); font-size:12px; color:var(--muted);
     }
-    .emp-list-item .status {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--success);
-      flex-shrink: 0;
+    .emp-dot { width:7px; height:7px; border-radius:50%; background:var(--success); flex-shrink:0; }
+    .emp-addr-short { color:var(--text); }
+    .emp-addr-full { margin-left:auto; font-size:11px; }
+
+    /* ── Contract info strip ── */
+    .contract-strip {
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+      padding:14px 16px; background:var(--bg); border:1px solid var(--border);
+      border-radius:8px; margin-bottom:20px;
+    }
+    .contract-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
+    .contract-addr { font-family:var(--mono); font-size:12px; color:var(--text); flex:1; word-break:break-all; }
+
+    /* ── Locked state ── */
+    .locked-state {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:60px 20px; text-align:center; color:var(--muted); gap:12px;
+    }
+    .locked-icon {
+      width:48px; height:48px; border-radius:12px; border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center; font-size:22px;
     }
 
-    /*  Divider  */
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 20px 0;
-    }
-
-    /*  Toast  */
+    /* ── Toast ── */
     #toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 18px;
-      font-size: 13px;
-      max-width: 360px;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: transform .25s ease, opacity .25s ease;
-      z-index: 100;
+      position:fixed; bottom:24px; right:24px; background:var(--surface);
+      border:1px solid var(--border); border-radius:8px; padding:12px 18px;
+      font-size:13px; max-width:340px; transform:translateY(80px); opacity:0;
+      transition:transform .25s, opacity .25s; z-index:200;
     }
-    #toast.show { transform: translateY(0); opacity: 1; }
-    #toast.ok  { border-color: var(--success); color: #4ade80; }
-    #toast.err { border-color: var(--danger);  color: #f87171; }
-    #toast.inf { border-color: var(--employer); color: #a78bfa; }
+    #toast.show { transform:translateY(0); opacity:1; }
+    #toast.ok  { border-color:var(--success); color:#4ade80; }
+    #toast.err { border-color:var(--danger);  color:#f87171; }
+    #toast.inf { border-color:var(--employer); color:#a78bfa; }
 
-    /*  Locked panel  */
-    .locked-msg {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 200px;
-      color: var(--muted);
-      font-size: 13px;
-      gap: 10px;
-      text-align: center;
+    @media (max-width: 700px) {
+      .content-grid { grid-template-columns:1fr; }
+      header { padding:14px 20px; }
+      .page-wrap { padding:24px 20px 60px; }
     }
-    .locked-msg .icon { font-size: 32px; }
   </style>
 </head>
 <body>
 
-<!--  Header  -->
 <header>
   <div class="logo">
     <div class="logo-icon">CP</div>
     ConfidentialPayroll
-    <span style="color:var(--muted); font-weight:400; font-size:12px;">/ FHEVM on Sepolia</span>
   </div>
+
+  <nav>
+    <a class="nav-tab active-employer" href="index.html">Employer</a>
+    <a class="nav-tab inactive" href="employee.html">Employee</a>
+  </nav>
+
   <div class="wallet-bar">
     <div class="net-badge">
       <div class="net-dot" id="netDot"></div>
@@ -407,394 +229,206 @@
     </div>
     <div class="net-badge" id="sdkBadge" style="display:none; margin-left:4px;">
       <div class="net-dot" id="sdkDot" style="background:orange;"></div>
-      <span id="sdkLabel" style="font-size:12px; color:var(--muted);">SDK loading...</span>
+      <span id="sdkLabel" style="font-size:12px; color:var(--muted);">SDK loading</span>
     </div>
-    <span id="walletAddr">-</span>
+    <span id="walletAddr"></span>
     <button id="connectBtn">Connect Wallet</button>
   </div>
 </header>
 
-<!--  FHE activity bar  -->
 <div id="fheBar">
   <div class="pulse-ring"></div>
   <span id="fheMsg">Computing on encrypted data</span>
   <span style="margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--muted);">Zama KMS relayer active</span>
 </div>
 
-<!--  Main panels  -->
-<main>
+<div class="page-wrap">
 
-  <!-- LEFT: Employer panel -->
-  <div class="panel">
-    <div class="panel-header">
-      <span class="tag">EMPLOYER</span>
-      <div>
-        <div class="panel-title">Run Payroll</div>
-        <div class="panel-sub">Salary amounts stay encrypted - even from you</div>
-      </div>
+  <div class="page-title-row">
+    <div>
+      <div class="page-title">Employer Dashboard</div>
+      <div class="page-sub">Register employees and run confidential payroll. Salary amounts are encrypted in your browser — the contract never sees plaintext values, and neither can you once submitted.</div>
     </div>
+    <span class="role-badge">EMPLOYER</span>
+  </div>
 
-    <div id="employerLocked" class="locked-msg">
-      <div class="icon">LOCK</div>
-      <div>Connect your wallet to access<br/>the employer panel</div>
+  <!-- Contract strip -->
+  <div class="contract-strip">
+    <span class="contract-label">Contract</span>
+    <span class="contract-addr">0xB482f89B468a9E9Ea8AFA38C09e83d0430D93De2</span>
+    <a href="https://sepolia.etherscan.io/address/0xB482f89B468a9E9Ea8AFA38C09e83d0430D93De2"
+       target="_blank" style="text-decoration:none;">
+      <button class="btn btn-outline btn-sm">Etherscan ↗</button>
+    </a>
+  </div>
+
+  <!-- Locked state -->
+  <div id="lockedState">
+    <div class="locked-state">
+      <div class="locked-icon">&#128274;</div>
+      <div style="font-weight:500; color:var(--text);">Connect your wallet to continue</div>
+      <div style="font-size:13px; max-width:320px;">Only the employer wallet (<code style="font-family:var(--mono); font-size:12px;">0xe769…c364</code>) can register employees and run payroll.</div>
     </div>
+  </div>
 
-    <div id="employerPanel" style="display:none">
+  <!-- Main content — shown after wallet connect -->
+  <div id="mainContent" style="display:none;">
+    <div class="content-grid">
 
-      <!-- Contract info -->
-      <div class="card">
-        <label>Contract Address</label>
-        <div style="font-family:var(--mono); font-size:12px; color:var(--muted); word-break:break-all;">
-          0xB482f89B468a9E9Ea8AFA38C09e83d0430D93De2
+      <!-- LEFT: Register employee -->
+      <div class="content-col">
+        <div class="card">
+          <div class="card-title">Register Employee</div>
+          <div class="card-sub">Add a wallet address to the payroll registry. Once registered, the employee appears in the payroll batch below.</div>
+          <div class="field">
+            <label>Employee Wallet Address</label>
+            <input type="text" id="addEmpAddr" placeholder="0x..." />
+          </div>
+          <button class="btn btn-outline" onclick="addEmployee()">+ Add Employee</button>
+          <div class="result-box" id="addEmpResult">—</div>
         </div>
-        <div style="margin-top:10px; display:flex; gap:8px;">
-          <button class="btn btn-outline btn-sm" onclick="loadEmployees()">Refresh Employee List</button>
-          <a href="https://sepolia.etherscan.io/address/0xB482f89B468a9E9Ea8AFA38C09e83d0430D93De2"
-             target="_blank"
-             style="text-decoration:none;">
-            <button class="btn btn-outline btn-sm">Etherscan</button>
+
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <div class="card-title" style="margin-bottom:0;">Registered Employees</div>
+            <button class="btn btn-outline btn-sm" onclick="loadEmployees()">&#8635; Refresh</button>
+          </div>
+          <div id="empListContainer">
+            <div style="color:var(--muted); font-size:13px;">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Run payroll -->
+      <div class="content-col">
+        <div class="card">
+          <div class="card-title">Run Payroll Batch</div>
+          <div class="card-sub">Each salary amount is encrypted in your browser using a ZK proof before being sent on-chain. The contract stores only ciphertexts — you cannot read the amounts back after submitting.</div>
+
+          <div id="payrollRows" style="margin-bottom:12px;"></div>
+
+          <button class="btn btn-outline btn-sm" onclick="addPayrollRow()" style="margin-bottom:16px;">+ Add Row</button>
+          <button class="btn btn-primary" id="runPayrollBtn" onclick="runPayroll()">
+            &#128274; Encrypt &amp; Run Payroll
+          </button>
+          <div class="result-box" id="payrollResult">—</div>
+        </div>
+
+        <div class="card" style="border-color:var(--employee-dim);">
+          <div class="card-title" style="color:var(--employee);">Employee Dashboard</div>
+          <div class="card-sub">Share this link with employees so they can connect their own wallet and decrypt their individual balance.</div>
+          <a href="employee.html" style="text-decoration:none;">
+            <button class="btn" style="background:var(--employee); color:#fff; margin-top:0;">
+              Go to Employee Dashboard &#8599;
+            </button>
           </a>
         </div>
       </div>
 
-      <!-- Add employee -->
-      <div class="card">
-        <div style="font-size:13px; font-weight:600; margin-bottom:14px;">Register Employee</div>
-        <div class="field">
-          <label>Employee Wallet Address</label>
-          <input type="text" id="addEmpAddr" placeholder="0x..." />
-        </div>
-        <button class="btn btn-outline" onclick="addEmployee()">+ Add Employee</button>
-        <div class="result-box" id="addEmpResult">-</div>
-      </div>
-
-      <!-- Employee list -->
-      <div class="card">
-        <div style="font-size:13px; font-weight:600; margin-bottom:14px;">Registered Employees</div>
-        <div id="empListContainer">
-          <div style="color:var(--muted); font-size:13px;">No employees loaded - click Refresh above.</div>
-        </div>
-      </div>
-
-      <hr class="divider"/>
-
-      <!-- Run payroll -->
-      <div class="card">
-        <div style="font-size:13px; font-weight:600; margin-bottom:6px;">Run Payroll Batch</div>
-        <div style="font-size:12px; color:var(--muted); margin-bottom:16px;">
-          Each amount is encrypted in your browser before being sent on-chain.
-          The contract never sees plaintext values.
-        </div>
-
-        <div id="payrollRows">
-          <!-- rows injected by JS -->
-        </div>
-
-        <button class="btn btn-outline btn-sm" onclick="addPayrollRow()" style="margin-bottom:16px; width:auto;">+ Add Row</button>
-
-        <button class="btn btn-primary" onclick="runPayroll()" id="runPayrollBtn">
-          Encrypt &amp; Run Payroll
-        </button>
-        <div class="result-box" id="payrollResult">-</div>
-      </div>
-
-    </div><!-- /employerPanel -->
-  </div><!-- /left panel -->
-
-  <!-- RIGHT: Employee panel -->
-  <div class="panel employee-panel">
-    <div class="panel-header">
-      <span class="tag employee">EMPLOYEE</span>
-      <div>
-        <div class="panel-title">My Balance</div>
-        <div class="panel-sub">Only you can decrypt your own salary</div>
-      </div>
     </div>
+  </div>
+</div>
 
-    <div id="employeeLocked" class="locked-msg">
-      <div class="icon">LOCK</div>
-      <div>Connect your wallet to decrypt<br/>your confidential balance</div>
-    </div>
-
-    <div id="employeePanel" style="display:none">
-
-      <div class="card">
-        <div class="balance-big">
-          <div class="balance-amount" id="balanceDisplay">-</div>
-          <div class="balance-unit">units (encrypted on-chain)</div>
-        </div>
-        <button class="btn btn-teal" onclick="decryptBalance()" id="decryptBtn">
-          Decrypt My Balance
-        </button>
-        <div class="result-box" id="decryptResult" style="margin-top:12px;">
-          Balance is stored as a ciphertext on-chain. Click above to request decryption via the Zama KMS relayer - only your wallet can authorize this.
-        </div>
-        <div class="balance-handle">
-          <span style="color:var(--muted);">Encrypted handle: </span>
-          <span id="handleDisplay">-</span>
-        </div>
-      </div>
-
-      <hr class="divider"/>
-
-      <!-- Privacy proof section -->
-      <div class="card">
-        <div style="font-size:13px; font-weight:600; margin-bottom:10px;">Privacy Verification</div>
-        <div style="font-size:12px; color:var(--muted); margin-bottom:14px;">
-          Paste another employee's wallet address below and attempt to read their balance.
-          The relayer will reject the request - proving salary isolation is enforced on-chain.
-        </div>
-        <div class="field">
-          <label>Target Address (someone else's wallet)</label>
-          <input type="text" id="proofTarget" placeholder="0x... (not your own address)" />
-        </div>
-        <button class="btn btn-outline-teal btn-sm" onclick="provePrivacy()">
-          Attempt Unauthorized Decrypt
-        </button>
-        <div class="result-box" id="proofResult">
-          Result will appear here - expect a rejection.
-        </div>
-      </div>
-
-      <hr class="divider"/>
-
-      <!-- Withdraw -->
-      <div class="card">
-        <div style="font-size:13px; font-weight:600; margin-bottom:6px;">Claim / Withdraw</div>
-        <div style="font-size:12px; color:var(--muted); margin-bottom:14px;">
-          Zeros your on-chain balance, simulating a payout. In a production system this
-          would trigger an ERC-7984 confidential token transfer.
-        </div>
-        <button class="btn btn-outline-teal" onclick="withdraw()" id="withdrawBtn">
-          Withdraw Balance
-        </button>
-        <div class="result-box" id="withdrawResult">-</div>
-      </div>
-
-    </div><!-- /employeePanel -->
-  </div><!-- /right panel -->
-</main>
-
-<!--  Toast  -->
 <div id="toast"></div>
 
-<!--  Scripts  -->
 <script type="module">
-// 
-// CONFIG  Sepolia testnet (from Zama .env.testnet)
-// 
 const CONTRACT_ADDRESS = "0xB482f89B468a9E9Ea8AFA38C09e83d0430D93De2";
-const CHAIN_ID = 11155111; // Sepolia
+const CHAIN_ID = 11155111;
 
-const RELAYER_CONFIG = {
-  networkUrl:  "https://ethereum-sepolia-rpc.publicnode.com",
-  relayerUrl:  "https://relayer.testnet.zama.org",
-  gatewayUrl:  "https://gateway.sepolia.zama.ai/",
-  aclContractAddress:            "0xf0Ffdc93b7E186bC2f8CB3dAA75D86d1930A433D",
-  kmsContractAddress:            "0xbE0E383937d564D7FF0BC3b46c51f0bF8d5C311A",
-  inputVerifierContractAddress:  "0xBBC1fFCdc7C316aAAd72E807D9b0272BE8F84DA0",
-};
-
-// 
-// ABI  only the functions our UI calls
-// 
 const ABI = [
   "function addEmployee(address employee) external",
   "function runPayroll(address[] calldata employees, bytes32[] calldata amounts, bytes[] calldata proofs) external",
-  "function getMyBalance() external view returns (bytes32)",
-  "function getBalanceHandle(address employee) external view returns (bytes32)",
   "function getEmployees() external view returns (address[])",
   "function isEmployee(address) external view returns (bool)",
-  "function withdraw() external",
   "event EmployeeAdded(address indexed employee)",
   "event PayrollRun(uint256 employeeCount, uint256 timestamp)",
-  "event Withdrawal(address indexed employee)",
 ];
 
-// 
-// State
-// 
-let provider, signer, contract, fhevmInstance;
-let walletAddress = null;
+let provider, signer, contract, fhevmInstance, walletAddress;
 
-// 
-// Import ethers and relayer SDK from CDN
-// 
-import { BrowserProvider, Contract, ethers } from
-  "https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.min.js";
+import { BrowserProvider, Contract } from "https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.min.js";
 
-// We load the relayer SDK dynamically from the UMD browser bundle.
 async function loadFhevmSDK() {
   if (window.relayerSDK && window.relayerSDKBaseUrl) return window.relayerSDK;
-
   const candidates = [
-    {
-      scriptUrl: "/node_modules/@zama-fhe/relayer-sdk/bundle/relayer-sdk-js.umd.cjs",
-      assetBaseUrl: "/node_modules/@zama-fhe/relayer-sdk/bundle",
-    },
-    {
-      scriptUrl: "https://cdn.jsdelivr.net/npm/@zama-fhe/relayer-sdk@0.4.1/bundle/relayer-sdk-js.umd.cjs",
-      assetBaseUrl: "https://cdn.jsdelivr.net/npm/@zama-fhe/relayer-sdk@0.4.1/bundle",
-    },
+    { scriptUrl:"https://cdn.jsdelivr.net/npm/@zama-fhe/relayer-sdk@0.4.1/bundle/relayer-sdk-js.umd.cjs", assetBaseUrl:"https://cdn.jsdelivr.net/npm/@zama-fhe/relayer-sdk@0.4.1/bundle" },
   ];
-  const errors = [];
-
-  for (const candidate of candidates) {
+  for (const c of candidates) {
     try {
-      await loadScript(candidate.scriptUrl);
-      if (window.relayerSDK) {
-        window.relayerSDKBaseUrl = candidate.assetBaseUrl;
-        return window.relayerSDK;
-      }
-      errors.push(`${candidate.scriptUrl}: window.relayerSDK was not found`);
-    } catch (err) {
-      errors.push(`${candidate.scriptUrl}: ${err.message || String(err)}`);
-    }
+      await loadScript(c.scriptUrl);
+      if (window.relayerSDK) { window.relayerSDKBaseUrl = c.assetBaseUrl; return window.relayerSDK; }
+    } catch(e) {}
   }
-
-  throw new Error("Failed to load @zama-fhe/relayer-sdk bundle. " + errors.join(" | "));
+  throw new Error("Failed to load FHEVM SDK bundle");
 }
 
 function loadScript(src) {
-  return new Promise((resolve, reject) => {
+  return new Promise((res, rej) => {
     const s = document.createElement("script");
-    s.src = src;
-    s.onload = resolve;
-    s.onerror = () => reject(new Error("script load failed"));
+    s.src = src; s.onload = res; s.onerror = () => rej(new Error("load failed"));
     document.head.appendChild(s);
   });
 }
 
-function wrapRelayerInstance(instance) {
+function wrapRelayerInstance(inst) {
   return {
-    createEncryptedInput: (contractAddress, userAddress) => instance.createEncryptedInput(contractAddress, userAddress),
-    userDecryptEuint32: async (handle, contractAddress, walletSigner) => {
-      const userAddress = await walletSigner.getAddress();
-      const keypair = instance.generateKeypair();
-      const startTimestamp = Math.floor(Date.now() / 1000);
-      const durationDays = 1;
-      const contractAddresses = [contractAddress];
-      const eip712 = instance.createEIP712(keypair.publicKey, contractAddresses, startTimestamp, durationDays);
-      const signature = await walletSigner.signTypedData(
-        eip712.domain,
-        { UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification },
-        eip712.message,
-      );
-
-      const result = await instance.userDecrypt(
-        [{ handle, contractAddress }],
-        keypair.privateKey,
-        keypair.publicKey,
-        signature,
-        contractAddresses,
-        userAddress,
-        startTimestamp,
-        durationDays,
-      );
-
-      return result[handle] ?? result[handle.toLowerCase()] ?? Object.values(result)[0];
-    },
+    createEncryptedInput: (ca, ua) => inst.createEncryptedInput(ca, ua),
   };
 }
 
-// 
-// Connect wallet
-// 
 window.connectWallet = async function() {
   const btn = document.getElementById("connectBtn");
-  btn.disabled = true;
-  btn.textContent = "Connecting";
-
+  btn.disabled = true; btn.textContent = "Connecting…";
   try {
-    if (!window.ethereum) throw new Error("MetaMask not found. Install it from metamask.io");
-
+    if (!window.ethereum) throw new Error("MetaMask not found");
     provider = new BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
-
-    // Switch to Sepolia if needed
     const network = await provider.getNetwork();
     if (Number(network.chainId) !== CHAIN_ID) {
-      try {
-        await provider.send("wallet_switchEthereumChain", [
-          { chainId: "0x" + CHAIN_ID.toString(16) }
-        ]);
-        provider = new BrowserProvider(window.ethereum);
-      } catch(e) {
-        throw new Error("Please switch MetaMask to Sepolia testnet manually");
-      }
+      await provider.send("wallet_switchEthereumChain", [{ chainId:"0x" + CHAIN_ID.toString(16) }]);
+      provider = new BrowserProvider(window.ethereum);
     }
-
     signer = await provider.getSigner();
     walletAddress = await signer.getAddress();
     contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
 
-    // Update header
-    document.getElementById("walletAddr").textContent =
-      walletAddress.slice(0,6) + "" + walletAddress.slice(-4);
+    document.getElementById("walletAddr").textContent = walletAddress.slice(0,6) + "…" + walletAddress.slice(-4);
     document.getElementById("netDot").classList.add("live");
     document.getElementById("netLabel").textContent = "Sepolia";
     btn.textContent = "Connected";
 
-    // Show panels
-    document.getElementById("employerLocked").style.display = "none";
-    document.getElementById("employerPanel").style.display  = "block";
-    document.getElementById("employeeLocked").style.display = "none";
-    document.getElementById("employeePanel").style.display  = "block";
+    document.getElementById("lockedState").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
 
-    toast("Wallet connected: " + walletAddress.slice(0,8) + "", "ok");
-
-    // Pre-load employee list immediately (doesn't need FHEVM SDK)
+    toast("Wallet connected", "ok");
     await loadEmployees();
-    await fetchBalanceHandle();
-
-    // Initialize FHEVM SDK asynchronously  show badge, don't block UI
     setSdkBadge("loading");
-    setFheBar(true, "Loading Zama FHEVM SDK");
-
-    initFhevmSDK(); // fire and forget  badge updates when done
-
+    setFheBar(true, "Loading Zama FHEVM SDK…");
+    initFhevmSDK();
   } catch(err) {
-    btn.disabled = false;
-    btn.textContent = "Connect Wallet";
-    toast(err.message, "err");
-    setFheBar(false);
-    setSdkBadge("error");
+    btn.disabled = false; btn.textContent = "Connect Wallet";
+    toast(err.message, "err"); setFheBar(false);
   }
 };
-
 document.getElementById("connectBtn").addEventListener("click", window.connectWallet);
 
-// 
-// FHEVM SDK init (runs after wallet connect)
-// 
 async function initFhevmSDK() {
   try {
-    setSdkBadge("loading");
-    setFheBar(true, "Loading Zama FHEVM SDK bundle");
-    const relayerSDK = await loadFhevmSDK();
-
-    setFheBar(true, "Initializing encryption runtime");
-    await relayerSDK.initSDK({
+    const sdk = await loadFhevmSDK();
+    setFheBar(true, "Initializing encryption runtime…");
+    await sdk.initSDK({
       tfheParams: `${window.relayerSDKBaseUrl}/tfhe_bg.wasm`,
-      kmsParams: `${window.relayerSDKBaseUrl}/kms_lib_bg.wasm`,
+      kmsParams:  `${window.relayerSDKBaseUrl}/kms_lib_bg.wasm`,
     });
-
-    setFheBar(true, "Connecting to Zama KMS relayer");
-    const relayerInstance = await relayerSDK.createInstance({
-      ...relayerSDK.SepoliaConfig,
-      network: window.ethereum || RELAYER_CONFIG.networkUrl,
-    });
-    fhevmInstance = wrapRelayerInstance(relayerInstance);
-
-    setSdkBadge("ready");
-    setFheBar(false);
-    toast("FHEVM SDK ready  KMS relayer connected", "ok");
+    setFheBar(true, "Connecting to Zama KMS relayer…");
+    const inst = await sdk.createInstance({ ...sdk.SepoliaConfig, network: window.ethereum });
+    fhevmInstance = wrapRelayerInstance(inst);
+    setSdkBadge("ready"); setFheBar(false);
+    toast("FHE SDK ready", "ok");
   } catch(err) {
-    setSdkBadge("error");
-    setFheBar(false);
-    // Show error but keep wallet connected  contract-read operations still work
-    toast("SDK init failed: " + err.message + "  encryption features disabled", "err");
-    console.error("FHEVM SDK init error:", err);
+    setSdkBadge("error"); setFheBar(false);
+    toast("SDK init failed: " + err.message, "err");
+    console.error(err);
   }
 }
 
@@ -803,381 +437,136 @@ function setSdkBadge(state) {
   const dot   = document.getElementById("sdkDot");
   const label = document.getElementById("sdkLabel");
   badge.style.display = "flex";
-  if (state === "loading") {
-    dot.style.background = "orange";
-    label.textContent = "SDK loading";
-  } else if (state === "ready") {
-    dot.style.background = "var(--success)";
-    label.textContent = "FHE ready";
-  } else if (state === "error") {
-    dot.style.background = "var(--danger)";
-    label.textContent = "SDK error";
-  }
+  const map = { loading:["orange","SDK loading…"], ready:["var(--success)","FHE ready"], error:["var(--danger)","SDK error"] };
+  [dot.style.background, label.textContent] = map[state];
 }
 
-// 
-// Employer: Add employee
-// 
+window.loadEmployees = async function() {
+  if (!contract) return;
+  const c = document.getElementById("empListContainer");
+  try {
+    const list = await contract.getEmployees();
+    if (!list.length) { c.innerHTML = '<div style="color:var(--muted);font-size:13px;">No employees registered yet.</div>'; rebuildRows([]); return; }
+    c.innerHTML = list.map(a => `<div class="emp-list-item"><div class="emp-dot"></div><span class="emp-addr-short">${a.slice(0,10)}…</span><span class="emp-addr-full">${a}</span></div>`).join("");
+    rebuildRows(list);
+  } catch(e) { c.innerHTML = `<div style="color:var(--danger);font-size:13px;">${parseError(e)}</div>`; }
+};
+
+function rebuildRows(employees) {
+  const c = document.getElementById("payrollRows");
+  if (!employees.length) { c.innerHTML = '<div style="color:var(--muted);font-size:13px;margin-bottom:8px;">Add employees first, then refresh.</div>'; return; }
+  c.innerHTML = employees.map((addr, i) => `
+    <div class="emp-row" id="row-${i}">
+      <div>
+        ${i === 0 ? '<label>Employee</label>' : ''}
+        <input type="text" value="${addr}" id="row-addr-${i}" readonly style="color:var(--muted);cursor:default;"/>
+      </div>
+      <div>
+        ${i === 0 ? '<label>Amount</label>' : ''}
+        <input type="number" min="0" placeholder="e.g. 5000" id="row-amt-${i}" />
+      </div>
+    </div>`).join("");
+}
+
+window.addPayrollRow = function() {
+  const c = document.getElementById("payrollRows");
+  const idx = "c_" + Date.now();
+  const d = document.createElement("div");
+  d.className = "emp-row"; d.id = "row-" + idx;
+  d.innerHTML = `<input type="text" placeholder="0x address" id="row-addr-${idx}"/><input type="number" min="0" placeholder="amount" id="row-amt-${idx}"/>`;
+  c.appendChild(d);
+};
+
 window.addEmployee = async function() {
   const addr = document.getElementById("addEmpAddr").value.trim();
   const res  = document.getElementById("addEmpResult");
   if (!contract) return toast("Connect wallet first", "err");
-  if (!addr || !addr.startsWith("0x")) return toast("Enter a valid 0x address", "err");
-
-  res.className = "result-box info";
-  res.textContent = "Sending transaction";
-  setFheBar(true, "Registering employee on-chain");
-
+  if (!addr.startsWith("0x")) return toast("Enter a valid 0x address", "err");
+  res.className = "result-box info"; res.textContent = "Sending transaction…";
+  setFheBar(true, "Registering employee on-chain…");
   try {
     const tx = await contract.addEmployee(addr);
-    res.textContent = "Tx sent: " + tx.hash;
+    res.textContent = "Tx: " + tx.hash;
     await tx.wait();
     res.className = "result-box success";
-    res.textContent = " Employee added | Tx: " + tx.hash;
+    res.textContent = "Employee added\nTx: " + tx.hash;
     document.getElementById("addEmpAddr").value = "";
     await loadEmployees();
     toast("Employee registered", "ok");
-  } catch(err) {
-    res.className = "result-box error";
-    res.textContent = parseError(err);
-    toast(parseError(err), "err");
-  } finally {
-    setFheBar(false);
-  }
+  } catch(e) { res.className = "result-box error"; res.textContent = parseError(e); toast(parseError(e), "err"); }
+  finally { setFheBar(false); }
 };
 
-// 
-// Employer: Load employee list
-// 
-window.loadEmployees = async function() {
-  if (!contract) return;
-  const container = document.getElementById("empListContainer");
-  try {
-    const employees = await contract.getEmployees();
-    if (employees.length === 0) {
-      container.innerHTML = '<div style="color:var(--muted); font-size:13px;">No employees registered yet.</div>';
-      rebuildPayrollRows([]);
-      return;
-    }
-    container.innerHTML = employees.map(addr =>
-      `<div class="emp-list-item">
-        <div class="status"></div>
-        <span>${addr.slice(0,8)}${addr.slice(-6)}</span>
-        <span style="font-size:11px; color:var(--muted);">${addr}</span>
-      </div>`
-    ).join("");
-    rebuildPayrollRows(employees);
-  } catch(err) {
-    container.innerHTML = '<div style="color:var(--danger); font-size:13px;">' + parseError(err) + '</div>';
-  }
-};
-
-// 
-// Payroll rows
-// 
-let customRows = []; // [{addr, amount}]
-
-function rebuildPayrollRows(employees) {
-  const container = document.getElementById("payrollRows");
-  if (employees.length === 0) {
-    container.innerHTML = '<div style="color:var(--muted); font-size:13px; margin-bottom:12px;">Add employees first, then refresh the list above.</div>';
-    return;
-  }
-  container.innerHTML = employees.map((addr, i) => `
-    <div class="emp-row" id="row-${i}">
-      <input type="text" value="${addr}" placeholder="0x..." id="row-addr-${i}" readonly
-             style="color:var(--muted); cursor:default;"/>
-      <div>
-        ${i === 0 ? '<label>Amount (units)</label>' : ''}
-        <input type="number" min="0" placeholder="e.g. 5000" id="row-amt-${i}" />
-      </div>
-      <div></div>
-    </div>
-  `).join("");
-}
-
-window.addPayrollRow = function() {
-  const container = document.getElementById("payrollRows");
-  const idx = "custom_" + Date.now();
-  const div = document.createElement("div");
-  div.className = "emp-row";
-  div.id = "row-" + idx;
-  div.innerHTML = `
-    <input type="text" placeholder="0x employee address" id="row-addr-${idx}" />
-    <input type="number" min="0" placeholder="amount" id="row-amt-${idx}" />
-    <button class="btn-icon" onclick="this.closest('.emp-row').remove()"></button>
-  `;
-  container.appendChild(div);
-};
-
-// 
-// Employer: Run payroll
-// 
 window.runPayroll = async function() {
   const res = document.getElementById("payrollResult");
   const btn = document.getElementById("runPayrollBtn");
   if (!contract) return toast("Connect wallet first", "err");
   if (!fhevmInstance) {
-    toast("FHEVM SDK still initializing  wait for 'FHE ready' badge in header, then try again", "err");
     res.className = "result-box error";
-    res.textContent = "FHEVM SDK not ready yet. Watch the header for 'FHE ready' status, then click again.";
+    res.textContent = "FHEVM SDK not ready yet — wait for the 'FHE ready' badge in the header, then try again.";
     return;
   }
-
-  // Collect rows
   const rows = [...document.querySelectorAll("[id^='row-']")]
     .filter(el => el.tagName === "DIV")
     .map(el => {
       const idx = el.id.replace("row-","");
-      const addrEl = document.getElementById("row-addr-"+idx);
-      const amtEl  = document.getElementById("row-amt-"+idx);
-      return addrEl && amtEl ? { addr: addrEl.value.trim(), amount: parseInt(amtEl.value) } : null;
+      const a = document.getElementById("row-addr-"+idx);
+      const m = document.getElementById("row-amt-"+idx);
+      return a && m ? { addr:a.value.trim(), amount:parseInt(m.value) } : null;
     })
-    .filter(r => r && r.addr && r.addr.startsWith("0x") && !isNaN(r.amount) && r.amount >= 0);
+    .filter(r => r && r.addr.startsWith("0x") && !isNaN(r.amount) && r.amount >= 0);
 
-  if (rows.length === 0) {
-    toast("Add at least one employee and amount", "err");
-    return;
-  }
+  if (!rows.length) return toast("Add at least one amount", "err");
 
   btn.disabled = true;
-  setFheBar(true, "Encrypting salary amounts in browser (ZK proof generation)");
-  res.className = "result-box info";
-  res.textContent = "Step 1/3: Generating encrypted inputs";
+  setFheBar(true, "Encrypting salary amounts (ZK proof generation)…");
+  res.className = "result-box info"; res.textContent = "Step 1/3: Encrypting inputs…";
 
   try {
-    // Encrypt all amounts. Each must be bound to the contract + sender address.
-    const handles = [];
-    let inputProof;
-
-    // FHEVM SDK batches up to 256 values in one proof.
-    // We build one input object per employee since each needs its own ciphertext-handle.
-    // Simpler approach: one input per employee, separate proofs.
-    const allHandles = [];
-    const allProofs  = [];
-
+    const allHandles = [], allProofs = [];
     for (const row of rows) {
-      const input = fhevmInstance.createEncryptedInput(CONTRACT_ADDRESS, walletAddress);
-      input.add32(row.amount);
-      const encrypted = await input.encrypt();
-      allHandles.push(encrypted.handles[0]);
-      allProofs.push(encrypted.inputProof);
+      const inp = fhevmInstance.createEncryptedInput(CONTRACT_ADDRESS, walletAddress);
+      inp.add32(row.amount);
+      const enc = await inp.encrypt();
+      allHandles.push(enc.handles[0]);
+      allProofs.push(enc.inputProof);
     }
-
-    // The contract expects (address[], externalEuint32[], bytes[])
-    // externalEuint32 is bytes32, inputProof is bytes per employee.
-    setFheBar(true, "Step 2/3: Broadcasting encrypted payroll transaction");
-    res.textContent = "Step 2/3: Sending transaction (check MetaMask)";
-
-    const employees = rows.map(r => r.addr);
-
-    // runPayroll signature: (address[], bytes32[], bytes[])
-    // We need to call with individual proofs array
-    const tx = await contract.runPayroll(employees, allHandles, allProofs);
-
-    res.textContent = "Step 3/3: Waiting for confirmation Tx: " + tx.hash;
-    setFheBar(true, "Step 3/3: Waiting for block confirmation");
-    await tx.wait();
-
-    res.className = "result-box success";
-    res.textContent = " Payroll complete! " + rows.length + " employee(s) paid.\nTx: " + tx.hash;
-    setFheBar(false);
-    toast("Payroll run complete  salaries encrypted on-chain", "ok");
-
-  } catch(err) {
-    res.className = "result-box error";
-    res.textContent = parseError(err);
-    setFheBar(false);
-    toast(parseError(err), "err");
-  } finally {
-    btn.disabled = false;
-  }
-};
-
-// 
-// Employee: fetch balance handle (raw ciphertext)
-// 
-async function fetchBalanceHandle() {
-  if (!contract) return null;
-  try {
-    const handle = await contract.getMyBalance();
-    document.getElementById("handleDisplay").textContent = handle;
-    return handle;
-  } catch(err) {
-    // Not an employee yet  that's fine
-    document.getElementById("handleDisplay").textContent = "Not registered as employee";
-    return null;
-  }
-}
-
-// 
-// Employee: Decrypt own balance
-// 
-window.decryptBalance = async function() {
-  const res = document.getElementById("decryptResult");
-  const display = document.getElementById("balanceDisplay");
-  const btn = document.getElementById("decryptBtn");
-  if (!contract) return toast("Connect wallet first", "err");
-  if (!fhevmInstance) return toast("FHEVM SDK not ready  wait for 'FHE ready' badge in header", "err");
-
-  btn.disabled = true;
-  setFheBar(true, "Requesting decryption from Zama KMS relayer");
-  res.className = "result-box info";
-  res.textContent = "Fetching encrypted handle from contract";
-
-  try {
-    const handle = await fetchBalanceHandle();
-    if (!handle || handle === ethers.ZeroHash) {
-      res.className = "result-box error";
-      res.textContent = "Your balance is uninitialized (zero). Ask your employer to run payroll first.";
-      display.textContent = "0";
-      setFheBar(false);
-      btn.disabled = false;
-      return;
-    }
-
-    res.textContent = "Handle fetched. Requesting KMS relayer decryption (requires MetaMask signature)";
-    setFheBar(true, "Waiting for EIP-712 signature approval in MetaMask");
-
-    // userDecrypt requires a signature from the signer authorizing the KMS to decrypt
-    const clearValue = await fhevmInstance.userDecryptEuint32(handle, CONTRACT_ADDRESS, signer);
-
-    display.textContent = clearValue.toString();
-    res.className = "result-box teal";
-    res.textContent = " Decrypted successfully. Your balance: " + clearValue + " units.\nOnly your wallet could authorize this decryption.";
-    setFheBar(false);
-    toast("Balance decrypted: " + clearValue + " units", "ok");
-
-  } catch(err) {
-    res.className = "result-box error";
-    res.textContent = "Decryption failed: " + parseError(err) + "\n\nThis is expected if you are not a registered employee or have no balance yet.";
-    setFheBar(false);
-    toast("Decryption failed  " + parseError(err), "err");
-  } finally {
-    btn.disabled = false;
-  }
-};
-
-// 
-// Employee: Privacy proof (try to read someone else's balance)
-// 
-window.provePrivacy = async function() {
-  const targetAddr = document.getElementById("proofTarget").value.trim();
-  const res = document.getElementById("proofResult");
-  if (!contract) return toast("Connect wallet first", "err");
-  if (!fhevmInstance) return toast("FHEVM SDK not ready - wait for 'FHE ready' badge in header", "err");
-  if (!ethers.isAddress(targetAddr)) return toast("Enter a valid target address", "err");
-  if (targetAddr.toLowerCase() === walletAddress.toLowerCase()) {
-    return toast("Enter someone ELSE'S address to prove isolation", "err");
-  }
-
-  res.className = "result-box info";
-  res.textContent = "Fetching handle for target address...";
-  setFheBar(true, "Attempting unauthorized decryption (will be rejected by KMS)...");
-
-  try {
-    const handle = await contract.getBalanceHandle(targetAddr);
-    res.textContent = "Handle fetched: " + handle.slice(0,18) + "...\nNow attempting to decrypt with YOUR wallet (not authorized)...";
-
-    // Try to decrypt. This should fail because the KMS only decrypts for
-    // the address that was granted FHE.allow() in the contract.
-    await fhevmInstance.userDecryptEuint32(handle, CONTRACT_ADDRESS, signer);
-
-    // If we get here, decryption unexpectedly succeeded
-    res.className = "result-box error";
-    res.textContent = "Unexpected: decryption succeeded. The ACL may not be set correctly.";
-  } catch(err) {
-    if (!isExpectedDecryptDenial(err)) {
-      res.className = "result-box error";
-      res.textContent = "Privacy proof inconclusive: " + parseError(err);
-      toast("Privacy proof inconclusive - " + parseError(err), "err");
-      return;
-    }
-
-    // This is the expected outcome: KMS rejected the request.
-    res.className = "result-box success";
-    res.textContent =
-      "Access DENIED by KMS relayer - as expected.\n\n" +
-      "The Zama KMS rejected this decryption request because your wallet (" +
-      walletAddress.slice(0,8) + "...) was never granted FHE.allow() " +
-      "for this employee's balance ciphertext.\n\n" +
-      "This proves salary isolation is enforced on-chain, not just in the UI.";
-    toast("Privacy proven - KMS rejected unauthorized decrypt", "ok");
-  } finally {
-    setFheBar(false);
-  }
-};
-
-// 
-// Employee: Withdraw
-// 
-window.withdraw = async function() {
-  const res = document.getElementById("withdrawResult");
-  const btn = document.getElementById("withdrawBtn");
-  if (!contract) return toast("Connect wallet first", "err");
-
-  btn.disabled = true;
-  res.className = "result-box info";
-  res.textContent = "Sending withdrawal transaction";
-  setFheBar(true, "Processing withdrawal");
-
-  try {
-    const tx = await contract.withdraw();
-    res.textContent = "Tx sent: " + tx.hash;
+    setFheBar(true, "Step 2/3: Broadcasting transaction…");
+    res.textContent = "Step 2/3: Sending — check MetaMask…";
+    const tx = await contract.runPayroll(rows.map(r => r.addr), allHandles, allProofs);
+    res.textContent = "Step 3/3: Confirming… Tx: " + tx.hash;
+    setFheBar(true, "Step 3/3: Waiting for block confirmation…");
     await tx.wait();
     res.className = "result-box success";
-    res.textContent = " Withdrawal complete. Balance zeroed.\nTx: " + tx.hash;
-    document.getElementById("balanceDisplay").textContent = "0";
-    toast("Withdrawal complete  balance zeroed", "ok");
-  } catch(err) {
-    res.className = "result-box error";
-    res.textContent = parseError(err);
-    toast(parseError(err), "err");
-  } finally {
-    btn.disabled = false;
-    setFheBar(false);
-  }
+    res.textContent = "Payroll complete — " + rows.length + " employee(s) paid (encrypted on-chain)\nTx: " + tx.hash;
+    toast("Payroll run complete", "ok");
+  } catch(e) {
+    res.className = "result-box error"; res.textContent = parseError(e);
+    toast(parseError(e), "err");
+  } finally { btn.disabled = false; setFheBar(false); }
 };
 
-// 
-// Helpers
-// 
 function setFheBar(active, msg) {
   const bar = document.getElementById("fheBar");
-  if (active) {
-    bar.classList.add("active");
-    if (msg) document.getElementById("fheMsg").textContent = msg;
-  } else {
-    bar.classList.remove("active");
-  }
+  active ? bar.classList.add("active") : bar.classList.remove("active");
+  if (msg) document.getElementById("fheMsg").textContent = msg;
 }
-
-function toast(msg, type = "inf") {
+function toast(msg, type="inf") {
   const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.className = "toast show " + type;
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => { t.className = "toast"; }, 4500);
+  t.textContent = msg; t.className = "toast show " + type;
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => { t.className = "toast"; }, 4500);
 }
-
 function parseError(err) {
   if (!err) return "Unknown error";
-  // Custom contract errors
-  if (err.message?.includes("NotEmployer"))     return "Only the employer can call this";
-  if (err.message?.includes("NotEmployee"))     return "This address is not a registered employee";
-  if (err.message?.includes("AlreadyEmployee")) return "Address is already registered";
-  if (err.message?.includes("ArrayLengthMismatch")) return "Employee and amount arrays must be the same length";
-  if (err.message?.includes("user rejected"))   return "Transaction rejected in MetaMask";
+  if (err.message?.includes("NotEmployer")) return "Only the employer can call this";
+  if (err.message?.includes("NotEmployee")) return "Address is not a registered employee";
+  if (err.message?.includes("AlreadyEmployee")) return "Address already registered";
+  if (err.message?.includes("ArrayLengthMismatch")) return "Arrays must be the same length";
+  if (err.message?.includes("user rejected")) return "Transaction rejected in MetaMask";
   if (err.message?.includes("insufficient funds")) return "Insufficient Sepolia ETH for gas";
   return err.reason || err.message || String(err);
 }
-
-function isExpectedDecryptDenial(err) {
-  if (err?.code === 4001 || err?.code === "ACTION_REJECTED") return false;
-  const message = (err?.reason || err?.message || String(err)).toLowerCase();
-  return /not authorized|not allowed|access denied|forbidden|acl|fhe\.allow|sendernotallowed/.test(message);
-}
 </script>
-
 </body>
 </html>
