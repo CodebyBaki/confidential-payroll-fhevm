@@ -22,9 +22,18 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Stage static site
+        run: |
+          mkdir site
+          cp index.html employee.html site/
+          touch site/.nojekyll
+
       - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: "."
+          path: site
+
       - id: deployment
         uses: actions/deploy-pages@v4
