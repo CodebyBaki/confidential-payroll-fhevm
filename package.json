@@ -79,6 +79,8 @@
     "chain": "hardhat node --network hardhat --no-deploy",
     "deploy:localhost": "hardhat deploy --network localhost",
     "deploy:sepolia": "hardhat deploy --network sepolia",
+    "dev:api": "node apps/api/server.js",
+    "start:api": "node apps/api/server.js",
     "verify:sepolia": "hardhat verify --network sepolia"
   },
   "overrides": {

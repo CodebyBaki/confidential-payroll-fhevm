@@ -102,34 +102,57 @@ npx hardhat --network sepolia payroll:my-balance --signer 1
 npx hardhat --network sepolia payroll:withdraw --signer 1
 ```
 
-## Frontend
+## Frontend and API
 
-Single-file `index.html` — no build step. Serve with:
+MetaMask required, set to Sepolia. The employer portal uses the `@zama-fhe/relayer-sdk` for browser-side encryption, and
+the employee portal uses EIP-712 signatures for user decryption.
+
+The app is split into separate portals:
+
+- `apps/employer/` - employer payroll management, employee registration, spreadsheet import, and encrypted payroll run.
+- `apps/employee/` - employee-only balance decryption, privacy verification, and demo withdrawal.
+- `apps/api/` - lightweight metadata API for payroll batch tracking. It stores batch status and transaction hashes, not
+  plaintext salary amounts.
+
+Run the API locally:
 
 ```bash
-npx serve .
-# open http://localhost:3000
+npm run dev:api
 ```
 
-MetaMask required, set to Sepolia. The frontend uses the `@zama-fhe/relayer-sdk` for browser-side encryption and EIP-712
-user decryption.
+Or run the Docker stack:
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+- Employer portal: `http://localhost:4000/employer/`
+- Employee portal: `http://localhost:4000/employee/`
+
+When running `npm run dev:api` directly, the API defaults to `http://localhost:4100` so it does not collide with common
+frontend dev servers.
 
 ## Project structure
 
 ```
 contracts/
-  ConfidentialPayroll.sol   ← main contract
-  FHECounter.sol            ← template example (unchanged)
+  ConfidentialPayroll.sol   <- main contract
+  FHECounter.sol            <- template example (unchanged)
 deploy/
-  deployPayroll.ts          ← deployment script
+  deployPayroll.ts          <- deployment script
 tasks/
-  ConfidentialPayroll.ts    ← all payroll Hardhat tasks
-  FHECounter.ts             ← template tasks (unchanged)
+  ConfidentialPayroll.ts    <- all payroll Hardhat tasks
+  FHECounter.ts             <- template tasks (unchanged)
 test/
-  ConfidentialPayroll.ts    ← 6 tests
-  FHECounter.ts             ← template tests (unchanged)
-index.html                  ← frontend (no build step)
-PAYROLL_README.md           ← extended notes and design rationale
+  ConfidentialPayroll.ts    <- 6 tests
+  FHECounter.ts             <- template tests (unchanged)
+apps/
+  employer/                 <- employer portal
+  employee/                 <- employee portal
+  api/                      <- metadata API
+PAYROLL_README.md           <- extended notes and design rationale
 ```
 
 ## Built with

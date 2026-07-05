@@ -1,0 +1,18 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      CHAIN_ID: "11155111"
+      CONTRACT_ADDRESS: "0xB482f89B468a9E9Ea8AFA38C09e83d0430D93De2"
+      DATA_DIR: /data
+      HOST: 0.0.0.0
+      PORT: "4000"
+    ports:
+      - "4000:4000"
+    volumes:
+      - payroll-api-data:/data
+
+volumes:
+  payroll-api-data:
